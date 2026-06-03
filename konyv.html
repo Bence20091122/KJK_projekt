@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House of Hell - Bővített Kiadás</title>
+    <style>
+        body {
+            background-color: #080808;
+            color: #d8d8d8;
+            font-family: 'Georgia', serif;
+            padding: 15px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(15, 15, 15, 0.95);
+            border: 3px solid #660000;
+            box-shadow: 0 0 25px #550000;
+            padding: 25px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        h1, h2, h3, h4 {
+            color: #ff2222;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 5px #000;
+            margin-top: 5px;
+        }
+
+        .image-container {
+            width: 100%;
+            max-height: 350px;
+            aspect-ratio: 16 / 9;
+            background: #140d0d;
+            border: 1px solid #441111;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .stats-panel {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            background: #121212;
+            padding: 15px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            gap: 10px;
+        }
+
+        .stat-box {
+            text-align: center;
+            font-size: 1em;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #ff2222;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .game-screen {
+            background: #0f0f0f;
+            border: 1px solid #222;
+            padding: 20px;
+            min-height: 120px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .minigame-zone {
+            display: none;
+            background: #111522;
+            border: 1px solid #335588;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        #clicker-zone {
+            background: #221a11;
+            border: 1px solid #885533;
+        }
+
+        .bar-container {
+            width: 100%;
+            background-color: #222;
+            height: 30px;
+            position: relative;
+            margin: 20px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+
+        .target-zone {
+            position: absolute;
+            left: 65%;
+            width: 20%;
+            height: 100%;
+            background-color: rgba(0, 255, 0, 0.3);
+            border-left: 2px dashed #00ff00;
+            border-right: 2px dashed #00ff00;
+        }
+
+        .pointer {
+            position: absolute;
+            left: 0%;
+            width: 15px;
+            height: 100%;
+            background-color: #ffcc00;
+            box-shadow: 0 0 10px #ffcc00;
+        }
+
+        .combat-zone {
+            display: none;
+            background: #221111;
+            border: 1px dashed #ff2222;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .battle-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .fighter {
+            width: 45%;
+            text-align: center;
+            padding: 10px;
+            background: #2b1111;
+            border: 1px solid #551111;
+        }
+
+        .vs {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ff2222;
+        }
+
+        .btn {
+            background: #7a0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95em;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            margin: 5px;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background: #ff2222;
+            box-shadow: 0 0 10px #ff2222;
+        }
+
+        .btn:disabled {
+            background: #222;
+            color: #555;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        #btn-restart {
+            background: #005511;
+        }
+        #btn-restart:hover {
+            background: #00cc33;
+            box-shadow: 0 0 10px #00ff33;
+        }
+
+        .log {
+            background: #050000;
+            color: #ff3333;
+            font-family: 'Courier New', monospace;
+            padding: 12px;
+            height: 130px;
+            overflow-y: auto;
+            border: 1px solid #441111;
+            margin-top: 15px;
+            font-size: 0.9em;
+            border-radius: 4px;
+            box-shadow: inset 0 0 10px #000;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* --- ÚJ: Gyógyital Animáció Stílusok --- */
+        #potion-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 9999;
+            text-align: center;
+            display: none;
+            background: rgba(5, 20, 5, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #00ff55;
+            box-shadow: 0 0 40px rgba(0, 255, 85, 0.6);
+            pointer-events: none;
+            width: 280px;
+        }
+
+        .animate-potion {
+            animation: potionSpinIn 5s ease-in-out forwards;
+        }
+
+        @keyframes potionSpinIn {
+            0% { 
+                transform: translate(-50%, -50%) scale(0) rotate(0deg); 
+                opacity: 0; 
+            }
+            15% { 
+                transform: translate(-50%, -50%) scale(1.1) rotate(360deg); 
+                opacity: 1; 
+            }
+            25% { 
+                transform: translate(-50%, -50%) scale(1) rotate(360deg); 
+                opacity: 1; 
+            }
+            85% { 
+                transform: translate(-50%, -50%) scale(1) rotate(360deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(0) rotate(720deg); 
+                opacity: 0; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="potion-overlay">
+    <img src="./potion.png" alt="Gyógyital" style="width: 120px; height: 120px; filter: drop-shadow(0 0 15px #00ff55); margin: 0 auto; display: block;">
+    <h2 style="color: #00ff55; text-shadow: 0 0 10px #000; margin: 15px 0 5px 0; font-size: 1.4em;">Gyógyital!</h2>
+    <p style="color: #fff; font-size: 1.2em; font-weight: bold; text-shadow: 1px 1px 5px #000; margin: 0;">+10 ÉLETERŐ</p>
+</div>
+
+<div class="container">
+    <h1>House of Hell</h1>
+    <h4 id="level-display">Szint: Ismeretlen</h4>
+    
+    <div class="image-container">
+        <img id="game-image" src="./castle_dark.jpg" alt="Játék háttér">
+    </div>
+
+    <div class="stats-panel">
+        <div class="stat-box" style="width: 100%; border-bottom: 1px solid #333; padding-bottom: 5px;">
+            Név: <span id="player-name" style="color: #fff; font-weight: bold;">?</span>
+            <button class="btn" id="btn-rename" onclick="rerollName()" style="padding: 2px 8px; font-size: 0.7em; margin-left: 10px;">Új név</button>
+        </div>
+        <div class="stat-box">Ügyesség (Skill) <span id="player-skill" class="stat-value">?</span></div>
+        <div class="stat-box">Életerő (Stamina) <span id="player-stamina" class="stat-value">?</span></div>
+        <div class="stat-box">Félelem (Fear) <span id="player-fear" class="stat-value">?</span> <small style="color: #666;">Max: <span id="player-max-fear">?</span></small></div>
+    </div>
+
+    <div class="game-screen" id="story-text">
+        Az eső mossa az utat, a kastély ajtaja nyitva áll. Először generáld le a karaktered, vagy válassz új nevet, ha a jelenlegi nem tetszik!
+    </div>
+
+    <div class="minigame-zone" id="minigame-zone">
+        <h3>Pánik! Csapda aktiválódott!</h3>
+        <p>A folyosó falaiból pengék lőnek ki! Nyomd meg a <strong>Kikerülés</strong> gombot, amikor a sárga jelző a zöld sávba ér!</p>
+        <div class="bar-container">
+            <div class="target-zone"></div>
+            <div class="pointer" id="minigame-pointer"></div>
+        </div>
+        <button class="btn" onclick="stopMinigame()">Kikerülés!</button>
+    </div>
+
+    <div class="minigame-zone" id="clicker-zone">
+        <h3>Omlás! Menekülés a Kriptából!</h3>
+        <p>A rituálé összeomlása miatt a mennyezet szakad le! Kattints a gombra őrült tempóban <strong>15-ször</strong>, mielőtt rád dől a kastély!</p>
+        <p style="font-size: 1.2em;">Hátralévő idő: <span id="clicker-timer" style="color: #ff2222; font-weight: bold;">5</span> mp</p>
+        <p style="font-size: 1.1em;">Kattintások: <span id="clicker-count" style="color: #ffcc00; font-weight: bold;">0</span> / 15</p>
+        <button class="btn" id="btn-clicker-mash" onclick="clickerMash()" style="padding: 15px 30px; font-size: 1.1em;">ZÚZD A GOMBOT!</button>
+    </div>
+
+    <div class="combat-zone" id="combat-zone">
+        <h3 id="combat-title">CSATA!</h3>
+        <div class="battle-flex">
+            <div class="fighter">
+                <h4>Te</h4>
+                <p>Támadóerő: <span id="p-attack-roll">-</span></p>
+            </div>
+            <div class="vs">VS</div>
+            <div class="fighter">
+                <h4 id="monster-name">Ellenség</h4>
+                <p>Életerő: <span id="m-stamina">-</span></p>
+                <p>Támadóerő: <span id="m-attack-roll">-</span></p>
+            </div>
+        </div>
+        <div style="text-align: center;">
+            <button class="btn" id="btn-fight-round" onclick="combatRound()">Kockadobás és Támadás (2d6)</button>
+        </div>
+    </div>
+
+    <div class="log" id="game-log">Rendszer üzenetek betöltése...</div>
+
+    <div class="controls">
+        <button class="btn" id="btn-generate" onclick="initCharacter()">Karakter Mentése & Indítás</button>
+        <button class="btn" id="btn-explore" onclick="progressGame()" disabled>Haladás előre</button>
+        <button class="btn" id="btn-restart" onclick="resetGame()" style="display: none;">Újraéledés</button>
+    </div>
+</div>
+
+<script>
+    const horrorNames = [
+        "Jonathan Harker", "Edward Carnby", "Arthur Pendelton", "Dr. Vincent Morrow", 
+        "Emily Vance", "Clara Ashcroft", "Thomas Thorne", "Sarah Penrose", "Jack McInnis"
+    ];
+
+    let player = {
+        name: "",
+        skill: 0,
+        stamina: 0,
+        fear: 0,
+        maxFear: 0,
+        isDead: false
+    };
+
+    let currentStage = 0; 
+    let currentMonster = null;
+    
+    let minigameInterval = null;
+    let pointerPos = 0;
+    let pointerDirection = 1;
+
+    let clickerClicks = 0;
+    const clickerTarget = 15;
+    let clickerTimeLeft = 5;
+    let clickerInterval = null;
+
+    const imageSources = {
+        0: "./castle_dark.jpg",       
+        1: "./castlespider_room.png", 
+        2: "./reses_folyoso.png",     
+        3: "./na_kinzo.webp",         
+        4: "./demonos.png",           
+        5: "./segitseg.png"        
+    };
+
+    window.onload = function() {
+        rerollName();
+    };
+
+    function rerollName() {
+        if(currentStage > 0) return;
+        player.name = horrorNames[Math.floor(Math.random() * horrorNames.length)];
+        document.getElementById("player-name").innerText = player.name;
+        logMessage(`Új név kiválasztva: ${player.name}`);
+    }
+
+    function logMessage(msg) {
+        const log = document.getElementById("game-log");
+        log.innerHTML += `[Rendszer]: ${msg}<br>`;
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function rollDice() {
+        return Math.floor(Math.random() * 6) + 1;
+    }
+
+    function setImage(stage) {
+        const imgElement = document.getElementById("game-image");
+        if (imageSources[stage]) {
+            imgElement.src = imageSources[stage];
+        }
+    }
+
+    function initCharacter() {
+        player.skill = rollDice() + 6;
+        player.stamina = rollDice() + rollDice() + 12;
+        player.maxFear = rollDice() + 6;
+        player.fear = 0;
+        player.isDead = false;
+        currentStage = 1;
+
+        document.getElementById("btn-rename").style.display = "none";
+        document.getElementById("btn-generate").disabled = true;
+        document.getElementById("btn-explore").disabled = false;
+        document.getElementById("btn-restart").style.display = "none";
+        
+        updateUI();
+        document.getElementById("level-display").innerText = "Szint 1: A Kastély Előszobája";
+        setImage(1);
+        
+        document.getElementById("story-text").innerHTML = `<strong>Kalandod megkezdődik, ${player.name}!</strong><br>Belépsz a Drachen-kastélyba. Az ajtó mögötted hatalmas dörrenéssel becsapódik és bezárul. Egy zombi szolga hörögve közeledik feléd a homályból!`;
+        
+        startCombat("Kastély Szolgája (Zombi)", 7, 6, false);
+    }
+
+    function updateUI() {
+        document.getElementById("player-skill").innerText = currentStage > 0 ? player.skill : "?";
+        document.getElementById("player-stamina").innerText = currentStage > 0 ? player.stamina : "?";
+        document.getElementById("player-fear").innerText = player.fear;
+        document.getElementById("player-max-fear").innerText = currentStage > 0 ? player.maxFear : "?";
+
+        if (currentStage > 0) {
+            if (player.stamina <= 0 && !player.isDead) die("A sérüléseid túl súlyosak voltak. Elvéreztél a sötétben.");
+            if (player.fear >= player.maxFear && !player.isDead) die("A szíved feladta a harcot... Meghaltál a tiszta rettegéstől!");
+        }
+    }
+
+    function die(reason) {
+        player.isDead = true;
+        document.getElementById("story-text").innerHTML = `<strong style="color:#ff2222;">GAME OVER</strong><br>${reason}`;
+        document.getElementById("btn-explore").disabled = true;
+        document.getElementById("combat-zone").style.display = "none";
+        document.getElementById("minigame-zone").style.display = "none";
+        document.getElementById("clicker-zone").style.display = "none";
+        
+        clearInterval(minigameInterval);
+        clearInterval(clickerInterval);
+
+        const restartBtn = document.getElementById("btn-restart");
+        restartBtn.innerText = "Újraéledés";
+        restartBtn.style.display = "inline-block";
+        
+        logMessage("A játékos meghalt. Kattints az Újraéledés gombra a próbálkozáshoz.");
+    }
+
+    function resetGame() {
+        player = { name: "", skill: 0, stamina: 0, fear: 0, maxFear: 0, isDead: false };
+        currentStage = 0;
+        currentMonster = null;
+        
+        clearInterval(minigameInterval);
+        clearInterval(clickerInterval);
+
+        document.getElementById("btn-rename").style.display = "inline-block";
+        document.getElementById("btn-generate").disabled = false;
+        document.getElementById("btn-explore").disabled = true;
+        document.getElementById("btn-restart").style.display = "none";
+        
+        document.getElementById("combat-zone").style.display = "none";
+        document.getElementById("minigame-zone").style.display = "none";
+        document.getElementById("clicker-zone").style.display = "none";
+        document.getElementById("potion-overlay").style.display = "none";
+        document.getElementById("potion-overlay").classList.remove("animate-potion");
+        
+        rerollName();
+        setImage(0);
+        document.getElementById("level-display").innerText = "Szint: Ismeretlen";
+        document.getElementById("story-text").innerHTML = "Az eső mossa az utat, a kastély ajtaja nyitva áll. Először generáld le a karaktered, vagy válassz új nevet, ha a jelenlegi nem tetszik!";
+        document.getElementById("game-log").innerHTML = "Játék újraindítva. Rendszer üzenetek betöltése...";
+        updateUI();
+    }
+
+    function progressGame() {
+        if(player.isDead) return;
+
+        currentStage++;
+        if (currentStage === 2) {
+            document.getElementById("level-display").innerText = "Szint 2: Halálos Folyosó";
+            setImage(2);
+            document.getElementById("story-text").innerText = "Túljutottál az előszobán. Ahogy a hosszú folyosóra lépsz, kattanást hallasz a talpad alól. Nyomásérzékelős csapda! Reflexre lesz szükséged!";
+            document.getElementById("btn-explore").disabled = true;
+            startMinigameLogic();
+        } 
+        else if (currentStage === 3) {
+            document.getElementById("level-display").innerText = "Szint 3: A Kínzókamra (MINI-BOSS)";
+            setImage(3);
+            document.getElementById("story-text").innerText = "Megmenekültél a pengéktől, de egy bűzös kamrába érsz. A sötétből a kastély hatalmas, torz Hóhérja lép elő, kezében egy rozsdás bárddal!";
+            startCombat("A Hóhér (Mini-Boss)", 9, 10, true);
+        } 
+        else if (currentStage === 4) {
+            document.getElementById("level-display").innerText = "Szint 4: A Titkos Szentély (FŐBOSS)";
+            setImage(4);
+            document.getElementById("story-text").innerText = "Elérted a kastély legmélyebb pontját. Lord Kelumar az oltár előtt áll, és épp befejezi a rituálét. Megfordul, szemei vörösen izzanak. Eljött a végső összecsapás!";
+            startCombat("Lord Kelumar (FŐBOSS)", 11, 14, true);
+        }
+        else if (currentStage === 5) {
+            document.getElementById("level-display").innerText = "Szint 5: Az Összeomló Kripta";
+            setImage(5);
+            document.getElementById("story-text").innerText = "Lord Kelumar elbukott, de a megszakadt rituálé miatt az egész kastély alapja megrendül! A falak repedeznek, a nehéz kőkapu lassan ereszkedik le, elzárva a menekülés útját. Át kell törnöd magad!";
+            startClickerLogic();
+        }
+        else if (currentStage === 6) {
+            setImage(0);
+            document.getElementById("level-display").innerText = "Győzelem!";
+            document.getElementById("story-text").innerHTML = `<strong style="color:#00ff00;">GRATULÁLUNK!</strong><br>Sikerült kijutnod az összeomló romok közül. Kijutsz a kastélyból, miközben a felkelő nap sugarai elűzik a gonoszt. Megnyerted a játékot!`;
+            document.getElementById("btn-explore").disabled = true;
+            
+            const restartBtn = document.getElementById("btn-restart");
+            restartBtn.innerText = "Újrakezdés";
+            restartBtn.style.display = "inline-block";
+            
+            logMessage("Győztél! Gratulálunk a túléléshez!");
+        }
+    }
+
+    function startMinigameLogic() {
+        document.getElementById("minigame-zone").style.display = "block";
+        pointerPos = 0;
+        pointerDirection = 2; 
+        
+        minigameInterval = setInterval(() => {
+            pointerPos += pointerDirection;
+            if(pointerPos >= 98 || pointerPos <= 0) {
+                pointerDirection *= -1;
+            }
+            document.getElementById("minigame-pointer").style.left = pointerPos + "%";
+        }, 20);
+    }
+
+    function stopMinigame() {
+        clearInterval(minigameInterval);
+        document.getElementById("minigame-zone").style.display = "none";
+        document.getElementById("btn-explore").disabled = false;
+
+        if (pointerPos >= 65 && pointerPos <= 85) {
+            logMessage("Sikeres kikerülés! Az ügyességed megmentett.");
+            document.getElementById("story-text").innerText = "Hihetetlen reflexekkel elvetődsz, a pengék centikkel suhannak el a fejed felett. Az út szabad előre!";
+        } else {
+            player.stamina -= 4;
+            player.fear += 2;
+            logMessage("Elhibáztad! A csapda megsebzett (-4 Életerő, +2 Félelem).");
+            document.getElementById("story-text").innerText = "Nem voltál elég gyors! Egy falból kilőtt penge mély sebet ejt a válladon, és a hirtelen fájdalomtól a torkodban dobog a szíved.";
+            updateUI();
+        }
+    }
+
+    function startClickerLogic() {
+        document.getElementById("clicker-zone").style.display = "block";
+        document.getElementById("btn-explore").disabled = true;
+        clickerClicks = 0;
+        clickerTimeLeft = 5;
+        document.getElementById("clicker-count").innerText = clickerClicks;
+        document.getElementById("clicker-timer").innerText = clickerTimeLeft;
+
+        clickerInterval = setInterval(() => {
+            clickerTimeLeft--;
+            document.getElementById("clicker-timer").innerText = clickerTimeLeft;
+            if (clickerTimeLeft <= 0) {
+                endClicker(false);
+            }
+        }, 1000);
+    }
+
+    function clickerMash() {
+        if (player.isDead || clickerTimeLeft <= 0) return;
+        clickerClicks++;
+        document.getElementById("clicker-count").innerText = clickerClicks;
+        if (clickerClicks >= clickerTarget) {
+            endClicker(true);
+        }
+    }
+
+    function endClicker(success) {
+        clearInterval(clickerInterval);
+        document.getElementById("clicker-zone").style.display = "none";
+
+        if (success) {
+            document.getElementById("btn-explore").disabled = false;
+            logMessage("Sikeresen áttörted a lezáródó kaput!");
+            document.getElementById("story-text").innerText = "Emberfeletti erővel és gyorsasággal átvetődsz a záródó kőkapu alatt, pont mielőtt az teljesen lecsapódna! Megmenekültél a bezártságtól, a kijárat már közel!";
+        } else {
+            // JAVÍTVA: Azonnali halál omláskor, nincs továbbjutás!
+            player.stamina = 0;
+            updateUI();
+            logMessage("Túl lassú voltál! Rád omlott a kripta.");
+            die("Túl lassú voltál! A mennyezet hatalmas robajjal leszakadt, és a tonnás kőtömbök teljesen maguk alá temettek az omladozó kriptában.");
+        }
+    }
+
+    // --- ÚJ: GYÓGYITAL ANIMÁCIÓ MEGJELENÍTÉSE ---
+    function triggerPotionReward() {
+        const healAmount = 10;
+        player.stamina += healAmount;
+        updateUI();
+        logMessage(`Legyőzted a Hóhért és találtál egy Gyógyitalt! (+${healAmount} Életerő)`);
+
+        const overlay = document.getElementById("potion-overlay");
+        overlay.style.display = "block";
+        overlay.classList.add("animate-potion");
+
+        // 5 másodperc (5000 ms) után teljesen eltűnik
+        setTimeout(() => {
+            overlay.style.display = "none";
+            overlay.classList.remove("animate-potion");
+        }, 3500);
+    }
+
+    function startCombat(mName, mSkill, mStamina, isBoss) {
+        currentMonster = { name: mName, skill: mSkill, stamina: mStamina };
+        
+        document.getElementById("combat-title").innerText = isBoss ? "FŐELLENSÉG HARC!" : "CSATA!";
+        document.getElementById("monster-name").innerText = currentMonster.name;
+        document.getElementById("m-stamina").innerText = currentMonster.stamina;
+        document.getElementById("p-attack-roll").innerText = "-";
+        document.getElementById("m-attack-roll").innerText = "-";
+        
+        document.getElementById("combat-zone").style.display = "block";
+        document.getElementById("btn-explore").disabled = true;
+    }
+
+    function combatRound() {
+        if (player.isDead || !currentMonster || currentMonster.stamina <= 0) return;
+
+        const pDice = rollDice() + rollDice();
+        const mDice = rollDice() + rollDice();
+
+        const playerAttack = player.skill + pDice;
+        const monsterAttack = currentMonster.skill + mDice;
+
+        document.getElementById("p-attack-roll").innerText = `${player.skill} + ${pDice} = ${playerAttack}`;
+        document.getElementById("m-attack-roll").innerText = `${currentMonster.skill} + ${mDice} = ${monsterAttack}`;
+
+        if (playerAttack > monsterAttack) {
+            currentMonster.stamina -= 2;
+            logMessage(`Megsebezted az ellenfelet: ${currentMonster.name} (-2 Életerő)`);
+        } else if (monsterAttack > playerAttack) {
+            player.stamina -= 2;
+            logMessage(`A(z) ${currentMonster.name} eltalált téged (-2 Életerő)`);
+            
+            if(currentStage >= 3) {
+                player.fear += 1;
+                logMessage("A szörnyeteg iszonyatos ereje növeli a Félelmedet! (+1 Félelem)");
+            }
+        } else {
+            logMessage("Kivédtétek egymás ütéseit. Döntetlen a kör.");
+        }
+
+        document.getElementById("m-stamina").innerText = currentMonster.stamina;
+        updateUI();
+
+        if (currentMonster.stamina <= 0 && !player.isDead) {
+            document.getElementById("combat-zone").style.display = "none";
+            document.getElementById("btn-explore").disabled = false;
+            
+            // JAVÍTVA: Ha a Hóhért győzzük le (Szint 3), jár a poti + egyedi szöveg
+            if (currentStage === 3) {
+                document.getElementById("story-text").innerText = "A Hóhér hatalmas teste puffanva zuhan a földre. A porban egy megcsillanó, zölden derengő fiolát veszel észre... egy titokzatos Gyógyitalt!";
+                triggerPotionReward();
+            } else {
+                logMessage(`Legyőzted őt: ${currentMonster.name}!`);
+                document.getElementById("story-text").innerText = `A(z) ${currentMonster.name} elterül a földön. Sikerült győzedelmeskedned, de nincs idő pihenni. Menj tovább!`;
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
